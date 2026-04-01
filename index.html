@@ -73,6 +73,11 @@
       color: var(--muted);
       margin-top: .3rem;
     }
+    .summary-card.red   .value { color: #dc2626; }
+    .summary-card.amber .value { color: #d97706; }
+    .summary-card.full {
+      grid-column: 1 / -1;
+    }
 
     /* ── New sale button ── */
     .btn-new {
@@ -271,6 +276,14 @@
     <div class="value" id="total-revenue">—</div>
     <div class="label">Total arrecadado</div>
   </div>
+  <div class="summary-card amber">
+    <div class="value" id="total-cost">—</div>
+    <div class="label">A repassar (R$50/voucher)</div>
+  </div>
+  <div class="summary-card">
+    <div class="value" id="total-profit">—</div>
+    <div class="label">Lucro líquido</div>
+  </div>
 </div>
 
 <button class="btn-new" onclick="openModal()">+ Nova Venda</button>
@@ -339,14 +352,23 @@
       .subscribe()
   }
 
+  const COST_PER_VOUCHER = 50
+
   // ── Render ─────────────────────────────────────────────────────
   function render() {
     clearError()
     const totalVouchers = sales.reduce((s, r) => s + (r.voucher_count || 0), 0)
     const totalRevenue  = sales.reduce((s, r) => s + parseFloat(r.sale_value || 0), 0)
+    const totalCost     = totalVouchers * COST_PER_VOUCHER
+    const totalProfit   = totalRevenue - totalCost
 
     document.getElementById('total-vouchers').textContent = totalVouchers
     document.getElementById('total-revenue').textContent  = formatBRL(totalRevenue)
+    document.getElementById('total-cost').textContent     = formatBRL(totalCost)
+    document.getElementById('total-profit').textContent   = formatBRL(totalProfit)
+
+    const profitCard = document.getElementById('total-profit').parentElement
+    profitCard.classList.toggle('red', totalProfit < 0)
 
     const list = document.getElementById('sales-list')
 
